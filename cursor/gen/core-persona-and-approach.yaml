@@ -1,0 +1,20 @@
+rule YAML is structured around pattern-based static analysis, but you can incorporate persona-aligned behavior via:
+
+Descriptive metadata (description, justification, recommendation)
+
+Tags and severity levels
+
+Scoped matching
+
+Embedded process guidelines
+
+Optional enhancements in custom fields or pre/post-processing guidance (even if not natively enforced by Cursor) -->
+
+rules:
+  - id: no-system-out
+    pattern: System.out.println(...)
+    message: Avoid using System.out in production code.
+    severity: WARNING
+    tags: [java, logging, anti-pattern]
+
+

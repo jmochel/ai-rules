@@ -1,0 +1,16 @@
+# Request for a plan
+
+We’re building a CLI tool to aid web development. We want to let an AI use this CLI tool to load a webpage it’s developing and get console logs and a representation of the webpage. This representation will only be markdown to start off (HTML -> markdown). We will add other things later. Use markdownify and playwright and poetry. Think through step by step how to make this very easy to use for an end user. Focus only on the interface for now (don’t think about the implementation yet). Write your plan in PLANNED_INTERFACE.md
+
+#4 Tell Cursor to Create a Implementation Plan ⚙️
+
+When the design plan looks good enough, we want cursor to create an implementation plan describing how it intends to implement the project. This should include things like a high level overview, folder structure, core functionality, and more.
+
+Provide feedback on the plan and iterate until you feel that Cursor has presented a solid idea. Make sure that it understands your goals, requirements, and core principles that would make this project truly useful.
+
+Nice! Review .cursorrules and make a plan for implementing the planned interface. Think step by step and finally write it down in IMPLEMENTATION_PLAN.md. Speed is a very high priority. Are there things we can about this or potential alternative solutions that we might be able to use?
+
+#5 Tell Cursor to Create a Todo List ✅
+
+Now that we have both a design plan and an implementation plan, it’s time to let Cursor create a todo list. Tell the AI to define small tasks that, taken together, completes the implementation plan.
+
