@@ -1,0 +1,130 @@
+---
+description: 
+globs: *.mdc
+alwaysApply: false
+---
+# Cursor Rules Management and Location
+
+## Overview
+This document defines the standard structure and management of cursor rules within a workspace. It ensures consistency in rule organization and accessibility across different environments.
+
+## Rule File Structure
+
+### Primary Location
+- All cursor rules must be stored in the `.cursor/rules` directory within the workspace root
+- This location is mandatory and serves as the source of truth for rule definitions
+- Files in this location should be considered the authoritative version
+
+### Secondary Location (Optional)
+- If a workspace contains an `ai-rules/cursor` directory, rule files should be mirrored there
+- This location serves as a backup and reference for AI-assisted development
+- Files in this location should be exact copies of those in `.cursor/rules`
+
+## File Naming Conventions
+
+### Rule File Names
+- Must use lowercase with hyphens for word separation
+- Must end with `.mdc` extension
+- Should be descriptive of the rule's purpose
+- Examples:
+  - `java-coding-standards.mdc`
+  - `exception-handling.mdc`
+  - `logging-guidelines.mdc`
+
+### Directory Structure
+```
+WORKSPACE/
+├── .cursor/
+│   ├── config.yaml
+│   └── rules/
+│       ├── core/
+│       │   ├── coding-standards.mdc
+│       │   ├── architecture.mdc
+│       │   └── testing.mdc
+│       ├── projects/
+│       │   ├── project-a/
+│       │   │   ├── java-rules.mdc
+│       │   │   └── api-rules.mdc
+│       │   └── project-b/
+│       │       ├── python-rules.mdc
+│       │       └── data-rules.mdc
+│       └── features/
+│           ├── security.mdc
+│           ├── monitoring.mdc
+│           └── documentation.mdc
+└── ai-rules/ (optional)
+    └── cursor/
+        ├── core/
+        ├── projects/
+        └── features/
+```
+
+## Configuration Reference
+
+### In .cursor/config.yaml
+Rules should be referenced using relative paths from the workspace root:
+```yaml
+workspace:
+  rules:
+    core:
+      - path: "ai-rules/core/coding-standards.mdc"
+    projects:
+      project-a:
+        - path: "ai-rules/projects/project-a/java-rules.mdc"
+    features:
+      security:
+        enabled: true
+        rules:
+          - path: "ai-rules/features/security.mdc"
+```
+
+## Rule File Management
+
+### Creation Process
+1. Create the rule file in `.cursor/rules/`
+2. If `ai-rules/cursor/` exists, copy the file there
+3. Update `.cursor/config.yaml` to reference the rule
+4. Verify the rule is loaded and active
+
+### Update Process
+1. Modify the rule file in `.cursor/rules/`
+2. If `ai-rules/cursor/` exists, synchronize the changes
+3. Verify the updated rule is loaded and active
+
+### Validation
+- All rule files must be valid MDC format
+- All referenced paths in `config.yaml` must exist
+- Rule files in both locations (if both exist) must be identical
+
+## Best Practices
+
+### Organization
+- Group related rules in appropriate directories
+- Use clear, descriptive names for rule files
+- Maintain consistent structure across all projects
+
+### Version Control
+- Include `.cursor/rules/` in version control
+- Optionally include `ai-rules/cursor/` in version control
+- Document rule changes in commit messages
+
+### Documentation
+- Each rule file should include:
+  - Clear title and description
+  - Rationale for the rule
+  - Examples of compliant and non-compliant code
+  - References to related rules
+
+## Enforcement
+
+### Automated Checks
+- CI/CD pipelines should verify:
+  - Rule file existence in `.cursor/rules/`
+  - Rule file synchronization (if `ai-rules/cursor/` exists)
+  - Valid MDC format
+  - Valid references in `config.yaml`
+
+### Manual Verification
+- Regular audits of rule files
+- Verification of rule effectiveness
+- Updates to reflect changing requirements

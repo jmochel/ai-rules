@@ -1,0 +1,164 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Your rule content
+
+[code-core.mdc](mdc:ai-rules/cursor/code-core.mdc)
+
+
+# Design Guidelines
+
+When modeling the domain we will see a mixture data elements and business logic 
+
+* Events
+* Commands
+* Queries
+* Data Transfer Objects
+* Value Objects 
+    * A Value Object is an immutable object that represents a specific value or set of values within the domain. 
+    * Value objects are distinguished from entities by their lack of identity and focus on describing a concept through their attributes.
+    * They are immutable, meaning their state cannot be changed after creation
+    * Two value objects are equal if their attributes have same value
+    * Their business logic should include no more than 
+        * Validation - Value Objects should validate the data they hold, ensuring it's within the allowed range, format, or business rules. 
+        * Conversion - If the Value Object needs to be represented in a different format (e.g., from a string to an integer), the conversion logic should be included within the Value Object itself. 
+        * Semantics - The Value Object can provide operations that directly modify or manipulate its data in a business-relevant way. For example a DateTime Value Object would have time based math operations such as DateTime.addDays(Int days). 
+* Entities 
+    * An entity is a domain object that is uniquely identifiable, usually via an ID, throughout its lifecycle. 
+    * Entities are mutable, and their attributes can change over time, but their identity remains the same. 
+    * Entities have a lifespan, tracking their history and changes, while value objects have a zero lifespan, existing only as a snapshot of data at a specific point in time. 
+    * Entities may have business logic associated with their   
+        * Entities in the domain layer should encapsulate their own business logic, including rules, operations, and constraints related to their state and behavior. 
+        * Specifically including 
+            * Constrains entity to valid states
+            * Manages transitions from state to state.
+* Aggregates
+    * An aggregate is a cluster of domain objects, that are treated as a single unit. It consists of one or more entities and value objects, along with the rules that govern their interactions and invariants that help to maintain consistency
+    * Aggregates in the domain layer should encapsulate their own business logic, including rules, operations, and constraints related to their state and behavior. 
+        *  Mutating the aggregate's state: This includes operations that modify the aggregate's entities or value objects while ensuring invariants are not violated. 
+        * Validating operations on the aggregate: Logic to ensure that operations performed on the aggregate are valid and adhere to business rules. 
+        * Enforcing invariants: This involves implementing the business rules that must always be true within the aggregate's scope. 
+        * Managing relationships between entities within the aggregate: Logic to handle dependencies and relationships between entities within the aggregate. 
+        * Creating new entities or value objects within the aggregate: Logic for creating and initializing new components within the aggregate's boundaries. 
+        * Applying business rules to the aggregate as a whole: Logic that applies to the aggregate's state as a unit, not just to individual entities. 
+* Domain Services 
+    * A Domain service is a coarse grained encapsulation of domain logic that spans multiple aggregates and entities
+    * Business logic in Domain Services
+        * Span multiple aggregates: Domain services are used when logic requires interaction with different aggregates or components.
+        * Orchestration: They can orchestrate multiple aggregates, triggering actions on them or coordinating changes across different entities.
+* Application Services
+    * Application Service is a coarse grained encapsulation of application logic that focuses on orchestrating interactions between domain entities and services, and should avoid embedding domain-specific logic. The application service should be a thin layer, handling requests, validating input, and delegating operations to the core domain model. 
+* Use Cases 
+    * A UseCase in an interface for fine grained encapsulation of application logic 
+    * Use cases (from Clean Architecture) are used to orchestrate inter-aggregate application logic in a comprehensible and a targeted way.
+        * Describe a specific business process or functionality.
+        * Contain the logic necessary to fulfill that business process.
+        * Interact with one or more entities to execute the required behavio
+        * Transactional demarcation on the level of use cases allows for enforcement of the inter-aggregates rules.  
+    
+
+# Naming Guidelines
+
+## Naming in general
+
+* Names must be consistent. 
+* Names must be concise: uses only the words necessary to communicate the concept it represents
+* Names Must be distinguishable. Visually and phonetically distinguished from other names.
+* Names must be understandable. They described the concept they represent.
+    * Use terms from the problem domain
+    * If terms from the problem domain are not available use dictionary terms
+    * Use standard terms for domain agnostic concepts i.e. DB has Insert, update, delete versus FILES have save or remove
+* Favorite consistency over the other principles. 
+* If consistency is in place 
+    * Favor understandable over concise
+    * Favor distinguishable over understandable
+    * Favor distinguishable over concise
+
+
+## Coding in Java 
+
+* Favor interfaces over class inheritance for expressing simple commonality in behavior 
+* Favor abstract classes over interfaces for decoupling API from implementation 
+* Favor enumeration types over constants
+* Favor composition over inheritance
+* Consider generic types, preferably with constraints
+* Consider using interfaces to achieve similar effect to multiple inheritance
+* Don't declare public fields
+
+
+## Javadoc Code Snippets in Javadoc
+
+Javadoc supports three different features for code markup. These are the HTML tags <pre> and <code> and the Javadoc tag {@code}
+
+<pre> - default HTML tag for preformatted text
+Line breaks and indentation are supported
+'@' is evaluated as a Javadoc tag. Must escape 
+'<' and '>' are evaluated as HTML tags. Must escape  
+
+/** 
+ * <pre>
+ * public class JavadocTest {
+ *   // indentation and line breaks are kept 
+ * 
+ *   &#64;SuppressWarnings
+ *   public List&#60;String&#62; generics(){
+ *     // '@', '<' and '>'  have to be escaped with HTML codes
+ *     // when used in annotations or generics
+ *   }
+ * } 
+ * </pre>
+ */
+
+<code> - default HTML tag for preformatted text
+Line breaks and indentation are not supported
+'@' is evaluated as a Javadoc tag. Must escape 
+'<' and '>' are evaluated as HTML tags. Must escape  
+
+
+{@code} - is a Javadoc tag
+Line breaks and indentation are not supported
+No escaping necessary 
+
+
+
+
+### Coding Classes
+
+* Use records for immutable situations
+* Use Lombok for most boiler plate code
+* Use @Builder 
+* Use @Slf4j  
+
+### Coding Methods
+
+* Methods should either 1. Do something or 2. Ask something
+* Validate arguents at the beginning of the method
+* Avoid booleans as parameters
+* Limit arguments to no more than 3 
+* Avoid side effects
+
+#### Exception handling 
+
+* Only throw when necessary like within the repository layers, rest layers, or other external adapters
+* In most layers use the operation result pattern. Only use exceptions when there isno other choice. 
+
+### Logging 
+
+* Log errors when the system cannot deliver on intended purpose
+* Log warnings when System may not deliver on intended purpose in the future
+* log info when system or its entities have changed state and it is important for the maintainer of teh backend to know about that state change
+* What should be communicated
+* 1. Context: What led to the error? What was the code trying to do when it failed? i.e “Failed to create a snapshot file; missing permission to create file.” 2. Content: What exactly failed?
+i.e. “Failed to create initial snapshot of data; database user ‘snapper’ lacks ‘create-snapshot’ permission” 3. Mitigation: What needs to be done in order to overcome the error? Could be a simple message or a URL describing the necessary troubleshooting details.
+
+
+### Coding Tests
+
+* Use BDD naming patterns such as given XXX When YYY Then ZZZ or when YYY Then ZZZ
+* Use single line comments in the test to seperate the 1. Given  2. When and 3. Then  sections
+* Use mockito for mocks when necessary.
+* 
+
+

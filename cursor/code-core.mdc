@@ -1,0 +1,44 @@
+---
+description: 
+globs: *.java
+alwaysApply: false
+---
+# General Guidelines
+
+    - Make Conservative changes to the code
+    - Do not change the OpenAI model being used
+
+# Keep it simple
+
+    - Prioritize, readability, and maintain ability
+    - Use standard libraries and patterns when possible
+
+# Code Changes
+
+    - Propose a clear plan before making changes
+    - Apply all modifications to a single file at once
+    - Do not alter unrelated files
+    - Do not remove unrelated code when performing a specific task
+
+# Bug fixes
+
+    - Analyze the problem thoroughly before suggesting fixes
+    - Provide Precise, targeted solutions
+    - Explain the root cause of the bug
+
+# Comments
+
+    - Do not remove comments, unless explicitly requested
+    - Comments classes with TODO
+    - Do not comment getter and setter methods
+    - Do not comment methods unless the TODO
+
+# Unused code handling
+
+    - If you detect unused code, ask for permission/confirmation before removing it
+
+# Logging
+
+
+
+
