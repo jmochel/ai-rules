@@ -1,0 +1,275 @@
+---
+description: Provides standards and best practices for Dropwizard and Guicey projects with Maven multi-module structure
+globs:
+  - "**/pom.xml"
+  - "**/*.java"
+alwaysApply: false
+conditions:
+  - type: file_content
+    pattern: "(guicey-*.*6\\.[0-9]+\\.[0-9]+|dropwizard.*3\\.[0-9]+\\.[0-9]+)"
+---
+
+# Dropwizard Maven Project Structure
+
+This guide provides comprehensive best practices for effectively using Maven in DW Exemplar projects, focusing on code organization, dependency management, testing, and tooling. It extends and builds upon the standards defined in the core-maven rule.
+
+## Project Structure
+
+The Dropwizard project follows a multi-module structure with the following components:
+
+```
+dw-exemplar/
+├── pom.xml                    # Parent POM
+├── dw-exemplar-api/          # API module
+│   └── pom.xml
+├── dw-exemplar-client/       # Client module
+│   └── pom.xml
+└── dw-exemplar-service/      # Service module
+    └── pom.xml
+```
+
+## Parent POM Requirements
+
+The parent POM (`pom.xml`) must follow these requirements :
+
+1. **Version Management**:
+   - Use `${revision}` property for versioning
+   - Define `<revision>` in properties section with comment explaining its special semantics
+   - Version format must be `1.0.${revision}`
+
+2. **Module Declaration**:
+   - Must declare all child modules in `<modules>` section
+   - Must include: dw-exemplar-api, dw-exemplar-client, dw-exemplar-service
+
+3. **Required Properties**:
+   - Must define Java version properties with comments
+   - Must define project-wide encoding properties
+   - Must define all dependency versions used across modules
+   - Must define all plugin versions used across modules
+
+4. **Dependency Management**:
+   - Must import Guicey BOM
+   - Must manage versions for:
+     - Lombok
+     - Guava
+     - Swagger
+     - JUnit Jupiter
+     - Mockito
+     - Jackson
+
+5. **Common Dependencies**:
+   - Must include:
+     - Lombok
+     - Guava
+     - Swagger annotations
+     - Jackson annotations
+     - Jackson JSR310 datatype
+     - JUnit Jupiter
+
+6. **Plugin Management**:
+   - Must configure:
+     - maven-jar-plugin
+     - maven-surefire-plugin
+     - maven-site-plugin
+     - sonar-maven-plugin
+     - maven-javadoc-plugin
+     - docker-maven-plugin
+     - maven-compiler-plugin
+     - flatten-maven-plugin
+
+7. **Repositories**:
+   - Must define:
+     - maven-central
+     - cloudrepo-releases
+     - cloudrepo-snapshots
+
+8. **Distribution Management**:
+   - Must configure:
+     - cloudrepo-snapshots
+     - cloudrepo-releases
+
+## API Module Requirements
+
+The API module (`dw-exemplar-api/pom.xml`) must follow all requirements from the core-maven rule, plus these additional requirements:
+
+1. **Parent Reference**:
+   - Must reference parent POM with `${revision}` version
+   - Must not redefine version
+
+2. **Required Dependencies**:
+   - Must include:
+     - dropwizard-validation
+     - dropwizard-jackson
+
+     in this format :
+
+     ```xml
+       <!--
+            This needs to be used instead of the Hibernate Validator standalone version, Without it
+            Dropwizard will not automatically hook into validation (e.g., fail-fast configuration validation on startup).
+
+            This validation dependency:
+
+            * Wraps Hibernate Validator
+            * Integrates it with Dropwizard  features like configuration parsing, request validation, and constraint handling.
+            * Adds Dropwizard specific annotations
+            * Adds automatic validation of fields in:
+                * Configuration files (Configuration classes)
+                * HTTP resource method parameters (via Jersey integration)
+
+        -->
+
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-validation</artifactId>
+        </dependency>
+
+        <!--
+            This needs to be used instead of the standalone jackson libraries.
+
+            This dependency:
+
+            * A pre-configured ObjectMapper with Dropwizard defaults (e.g. ISO-8601 dates, snake_case naming).
+            * Adds support for Optional<T> in HTTP request returns and request parameters.
+            * Required for correct JSON serialization and deserialization of configuration classes
+            * Ensures jackson modules are correctly registered at startup
+            * Allows you to use @JsonProperty, @JsonCreator, or @JsonTypeInfo in your resource models.
+            * Provides built in support for loading java time types in configuration classes. Joda time is no longer tested or supported.
+
+        -->
+
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-jackson</artifactId>
+        </dependency>
+
+     ```
+
+## Client Module Requirements
+
+The client module (`dw-exemplar-client/pom.xml`) must follow all requirements from the core-maven rule, plus these additional requirements:
+
+1. **Parent Reference**:
+   - Must reference parent POM with `${revision}` version
+   - Must not redefine version
+
+2. **Properties**:
+   - Must define `service.package`
+   - Must define Retrofit version
+
+3. **Dependency Management**:
+   - Must manage Retrofit dependencies
+
+4. **Required Dependencies**:
+   - Must include:
+     - dw-exemplar-api (with `${project.version}`)
+     - http-common
+     - dropwizard-guicey
+     - Retrofit and its adapters
+
+5. **Build Configuration**:
+   - Must configure swagger-maven-plugin
+
+## Service Module Requirements
+
+The service module (`dw-exemplar-service/pom.xml`) must follow all requirements from the core-maven rule, plus these additional requirements:
+
+1. **Parent Reference**:
+   - Must reference parent POM with `${revision}` version
+   - Must not redefine version
+
+2. **Properties**:
+   - Must define:
+     - `service.package`
+     - `service.main.class`
+     - maven-shade-plugin version
+     - mysql-connector-java version
+     - testcontainers version
+     - mapstruct version
+
+3. **Required Dependencies**:
+   - Must include:
+     - Guicey and Dropwizard framework dependencies
+     - dw-exemplar-api (with `${project.version}`)
+     - dw-exemplar-api test-jar
+     - mysql-connector-java
+     - mapstruct
+     - Test dependencies (common-test, testcontainers, awaitility)
+
+4. **Build Configuration**:
+   - Must configure:
+     - maven-shade-plugin
+     - swagger-maven-plugin
+
+## Common Requirements for All Modules
+
+All modules must follow the common requirements from the core-maven rule, plus these additional requirements:
+
+1. **Version References**:
+   - Child modules must use `${project.version}` when referencing sibling modules
+   - Must not hardcode versions in child modules
+
+2. **Documentation**:
+   - Must include appropriate comments explaining dependency purposes
+   - Must document special version handling requirements
+
+3. **Testing**:
+   - Must include appropriate test dependencies
+   - Must configure test plugins correctly
+
+4. **Code Quality**:
+   - Must configure appropriate code quality plugins
+   - Must follow consistent formatting and style
+
+## Best Practices
+
+In addition to the best practices from the core-maven rule, follow these additional practices:
+
+1. **Version Management**:
+   - Use `${revision}` in parent POM
+   - Use `${project.version}` in child modules
+   - Never hardcode versions in child modules
+
+2. **Dependency Management**:
+   - Centralize version management in parent POM
+   - Use BOMs where appropriate
+   - Document dependency purposes
+
+3. **Plugin Configuration**:
+   - Centralize plugin versions in parent POM
+   - Configure plugins consistently across modules
+   - Document plugin purposes
+
+4. **Documentation**:
+   - Include README.md in each module
+   - Document startup instructions
+   - Document health check endpoints
+
+5. **Testing**:
+   - Include comprehensive test coverage
+   - Use appropriate testing frameworks
+   - Configure test plugins correctly
+
+## Common Pitfalls
+
+In addition to the common pitfalls from the core-maven rule, be aware of these additional pitfalls:
+
+1. **Version Management**:
+   - Incorrect use of `${revision}` vs `${project.version}`
+   - Hardcoded versions in child modules
+   - Missing version properties in parent POM
+
+2. **Dependency Management**:
+   - Missing required dependencies
+   - Incorrect dependency scopes
+   - Version conflicts
+
+3. **Plugin Configuration**:
+   - Missing required plugins
+   - Incorrect plugin configuration
+   - Version conflicts
+
+4. **Documentation**:
+   - Missing or incomplete documentation
+   - Incorrect startup instructions
+   - Missing health check documentation

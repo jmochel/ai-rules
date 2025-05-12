@@ -1,0 +1,292 @@
+---
+description: Provides standards and best practices for maven projects
+globs:
+  - "**/pom.xml"
+alwaysApply: false
+---
+
+- **Introduction**
+
+  This guide provides comprehensive best practices for effectively using Maven in Java development, focusing on code organization, dependency management, testing, and tooling. Adhering to these guidelines will result in more maintainable, scalable, and robust Maven projects.
+
+- **Code Organization and Structure**
+
+  - **Standard Directory Structure:**
+
+    - Follow the standard Maven directory structure for consistency and ease of understanding:
+
+      project-root/
+      ├── src/
+      │   ├── main/
+      │   │   ├── java/      # Source code
+      │   │   ├── resources/ # Resources (e.g., properties files)
+      │   ├── test/
+      │   │   ├── java/      # Test code
+      │   │   ├── resources/ # Test resources
+      │   └── ....
+      │
+      └── pom.xml            # Maven project definition
+
+  - **Module Organization (Multi-Module Projects):**
+
+    - Follow the standard Maven directory structure for consistency and ease of understanding:
+
+      parent-project/
+      ├── pom.xml            # Maven parent project definition
+      ├── child-module-1/
+      │     └── pom.xml            # Maven child module definition
+      │
+      └── child-module-2/
+            └── pom.xml            # Maven child module definition
+
+
+-- **Standard Maven POM Structure**
+
+    Include the elemen ts in the following order
+
+    - `<modelVersion>`
+    - `<parent>`    - If it's a child module POM
+    - `<groupId>`
+    - `<artifactId>`
+    - `<version>`
+    - `<packaging>`
+    - `<name>`
+    - `<description>`
+    - `<modules>` – (if it's a parent POM)
+    - `<distributionManagement>`
+    - `<properties>`
+    - `<dependencyManagement>`
+    - `<dependencies>`
+    - `<repositories>`
+    - `<pluginRepositories>`
+    - `<build>`
+    - `<reporting>`
+    - `<profiles>`
+
+- **<version> element:**
+
+    - Must contain the `${revision}` property which is defined down in the property section. This ensures that any properties used by Any child modules Will be correctly processed
+
+- **properties element:**
+
+    - Must contain properties defined in the following order:
+    - `<revision>` defined in a parent POM as as below with comment included
+    ```xml
+       <!--
+            Revision for the entire project
+
+            <revision> is a maven property with special semantics and inheritance rules
+            Do not mucked with this unless you understand those rules.
+
+            See Maven discussion of revision for details
+
+        -->
+
+        <revision>XXX</revision>
+    ```
+    - define `java.version`, `maven.compiler.source`, `maven.compiler.target` as below with comment included
+    ```xml
+        <!--
+            <java.version> It's an amazing property with special semantics and inheritance rules.
+            Do not muck with this unless you understand the rules.
+
+            See readme.md section on Java Versions for details
+        -->
+
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    ```
+    - define project file properties in parent or standalone project poms as below
+    ```xml
+        <!-- Project Wide Properties The following properties are common to all the child modules -->
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    ```
+    - Define Java Dependency Versions
+    ```xml
+        <!-- Java Dependency Versions - versions of artifacts that are used with all the child modules -->
+
+        <guicey.version>6.2.0</guicey.version>
+        <lombok.version>1.18.30</lombok.version>
+        <guava.version>31.1-jre</guava.version>
+        <swagger.v3.version>2.2.2</swagger.v3.version>
+        <junit-jupiter.version>5.10.1</junit-jupiter.version>
+        <mockito-junit-jupiter.version>5.8.0</mockito-junit-jupiter.version>
+    ```
+    - Define plugin property versions
+    ```xml
+            <!-- Project Wide Plugin Versions - versions of plug-ins that are used with all the child modules -->
+
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-site-plugin.version>4.0.0-M12</maven-site-plugin.version>
+        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+        <maven-flatten-plugin.version>1.5.0</maven-flatten-plugin.version>
+        <maven-docker-plugin.version>0.24.0</maven-docker-plugin.version>
+        <maven-swagger-plugin.version>2.2.19</maven-swagger-plugin.version>
+    ```
+
+- **dependencyManagement element:**
+
+    looks like:
+
+    ```xml
+    <!--
+       Dependency Management
+
+        This dependency management section defines the version and scope of Java dependencies
+        used in this project and any child modules.
+
+        The child modules need only to reference to dependency without version of scope in their dependencies section
+    -->
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!--
+                The imported Guicey BOM defines all the standard versions of its own dependencies, including DropWizard
+
+                To Check for current version: https://mvnrepository.com/artifact/ru.vyarus.guicey/guicey-bom
+            -->
+
+            <dependency>
+                <groupId>ru.vyarus.guicey</groupId>
+                <artifactId>guicey-bom</artifactId>
+                <version>${guicey.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--
+                To Check for current version: https://mvnrepository.com/artifact/org.projectlombok/lombok
+            -->
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!--
+                To Check for current version: https://mvnrepository.com/artifact/com.google.guava/guava
+            -->
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <!--
+                To Check for current version: https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-annotations
+            -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.v3.version}</version>
+            </dependency>
+
+            <!-- Test Dependencies -->
+
+            <!-- To Check for current version:  https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- To Check for current version: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- To Check for current version: https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito-junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+    ```
+- **dependencies element:**
+
+looks like:
+
+```xml
+  <dependencies>
+
+        <!--
+            Lombok is used in all children modules and is used by the APT (Annotation Processing Tool)
+            It makes sense to ensure that we use the same version of the library throughout the children modules
+        -->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!--
+            Guava is often used in our code AND some DropWizard extensions include outdated versions that are not
+            as workable. It makes sense to ensure that we use the same version of the library throughout the
+            children modules.
+        -->
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!--
+            Swagger is used in all children modules. It is easy to include a library/version of the annotations
+            that doesn't work with DropWizard or the plug-in we're using.
+            It makes sense to ensure that we use the same version of the library throughout the project
+        -->
+
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+
+        <!--
+            Jackson (or Jackson annotations) is used in all children modules. Since Jackson also often has security issues associated with it,
+            it makes sense to ensure that we use the same version of the library throughout the project.
+        -->
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+
+    </dependencies>
+
+```
+
+- **Common Pitfalls and Gotchas**
+
+  - **Dependency Conflicts:**  Use `mvn dependency:tree` to identify and resolve dependency conflicts. Use `<dependencyManagement>` to control versions.
+  - **Version Mismatches:** Ensure all modules in a multi-module project use compatible versions of dependencies.
+  - **Transitive Dependencies:** Be aware of transitive dependencies and their potential impact on your project.
+  - **Incorrect Scopes:** Use the correct dependency scopes (e.g., compile, runtime, test, provided) to avoid including unnecessary dependencies in the final artifact.

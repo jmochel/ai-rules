@@ -1,0 +1,38 @@
+---
+description: Provides Dropwizard and Guicey projects Code quality checks
+globs:
+  - "**/*.java"
+alwaysApply: false
+conditions:
+  - type: file_content
+    pattern: "(guicey-*.*6\\.[0-9]+\\.[0-9]+|dropwizard.*3\\.[0-9]+\\.[0-9]+)"
+---
+
+- name: enforce-guicebundle-usage
+  pattern: |
+    class $CLASS extends Application<$CONFIG> {
+      public void initialize(Bootstrap<$CONFIG> bootstrap) {
+        // Missing GuiceBundle initialization
+      }
+    }
+  message: "Applications should initialize GuiceBundle in the initialize method."
+  severity: error
+
+ - name: discourage-manual-resource-registration
+  pattern: |
+    environment.jersey().register($RESOURCE);
+  message: "Use Guicey's automatic resource registration instead of manual registration."
+  severity: warning
+
+- name: detect-deprecated-javax-inject
+  pattern: |
+    import javax.inject.$ANNOTATION;
+  message: "Replace 'javax.inject' annotations with 'jakarta.inject' equivalents."
+  severity: warning
+
+- name: detect-deprecated-dropwizard-api
+  pattern: |
+    environment.healthChecks().register($NAME, $CHECK);
+  message: "Consider using Guicey's health check registration mechanisms."
+  severity: info
+

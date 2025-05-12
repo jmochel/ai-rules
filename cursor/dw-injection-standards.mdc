@@ -1,0 +1,138 @@
+
+---
+description: Provides standards and best practices for Dropwizard and Guicey projects with Maven multi-module structure
+globs:
+  - "**/pom.xml"
+  - "**/*.java"
+alwaysApply: false
+conditions:
+  - type: file_content
+    pattern: "(guicey-*.*6\\.[0-9]+\\.[0-9]+|dropwizard.*3\\.[0-9]+\\.[0-9]+)"
+---
+
+# Dependency Injection Standards
+
+## ❌ Prohibited Annotations
+Do not use the following Google Guice annotations:
+```java
+import com.google.inject.Inject;        // ❌ Don't use
+import com.google.inject.Named;         // ❌ Don't use
+import com.google.inject.Singleton;     // ❌ Don't use
+import com.google.inject.Provider;      // ❌ Don't use
+```
+
+## ✅ Required Annotations
+Always use JSR-330 annotations from `javax.inject`:
+```java
+import javax.inject.Inject;        // ✅ Use this
+import javax.inject.Named;         // ✅ Use this
+import javax.inject.Singleton;     // ✅ Use this
+import javax.inject.Provider;      // ✅ Use this
+```
+
+## Best Practices
+
+### Constructor Injection
+Always prefer constructor injection over field injection:
+
+```java
+// ✅ GOOD: Constructor injection
+@Path("/api/resource")
+public class MyResource {
+    private final MyService service;
+
+    @Inject
+    public MyResource(MyService service) {
+        this.service = service;
+    }
+}
+
+// ❌ BAD: Field injection
+@Path("/api/resource")
+public class MyResource {
+    @Inject
+    private MyService service;  // Don't do this
+}
+```
+
+### Singleton Usage
+Use `@Singleton` when you need exactly one instance:
+
+```java
+// ✅ GOOD: Using javax.inject.Singleton
+@Singleton
+public class MyService {
+    @Inject
+    public MyService(MyRepository repo) {
+        // ...
+    }
+}
+
+// ❌ BAD: Using Guice's Singleton
+@com.google.inject.Singleton  // Don't use this
+public class MyService {
+    // ...
+}
+```
+
+### Named Qualifiers
+Use `@Named` for qualifying implementations:
+
+```java
+// ✅ GOOD: Using javax.inject.Named
+@Named("primary")
+public class PrimaryDataSource implements DataSource {
+    // ...
+}
+
+// ❌ BAD: Using Guice's Named
+@com.google.inject.Named("primary")  // Don't use this
+public class PrimaryDataSource implements DataSource {
+    // ...
+}
+```
+
+### Provider Pattern
+Use `javax.inject.Provider` when lazy loading is needed:
+
+```java
+// ✅ GOOD: Using javax.inject.Provider
+public class MyService {
+    private final Provider<ExpensiveResource> resourceProvider;
+
+    @Inject
+    public MyService(Provider<ExpensiveResource> resourceProvider) {
+        this.resourceProvider = resourceProvider;
+    }
+}
+
+// ❌ BAD: Using Guice's Provider
+public class MyService {
+    private final com.google.inject.Provider<ExpensiveResource> resourceProvider;  // Don't use this
+    // ...
+}
+```
+```
+
+2. Then modify the `dropwizard-guicey-standards.mdc` file to import this content. In the Dependency Injection section, add:
+
+```markdown
+### Dependency Injection
+@{.cursor/rules/injection-standards.mdc}
+
+Additional module-specific injection guidelines:
+- Use appropriate scopes for your Dropwizard resources (@RequestScoped vs @Singleton)
+- Configure bindings in dedicated Guicey modules
+- Use multi-bindings when appropriate for plugin-style architecture
+```
+
+This approach has several benefits:
+1. Keeps the injection standards modular and reusable
+2. Makes it easier to maintain the injection standards separately
+3. Allows you to import the same standards into other rules files
+4. Keeps the main Dropwizard-Guicey standards file cleaner and more focused
+
+Would you like me to:
+1. Show you how to create both files?
+2. Add more specific Dropwizard-related injection guidelines?
+3. Include additional examples?
