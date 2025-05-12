@@ -1,8 +1,9 @@
 ---
-description: 
+description: General core guidelines for changing java code
 globs: *.java
 alwaysApply: false
 ---
+
 # General Guidelines
 
     - Make Conservative changes to the code

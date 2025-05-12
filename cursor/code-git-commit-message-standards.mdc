@@ -1,7 +1,7 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description:  General Git commit messages
+globs:
+alwaysApply: true
 ---
 # Git Commit Message Standards
 
